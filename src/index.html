@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Rotation and Translation Control</title>
-    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.0.0/dist/gif.js"></script>
     <script type="module">
         import * as THREE from 'https://esm.sh/three';
         import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
@@ -16,9 +15,7 @@
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setClearColor(0x131313);
         renderer.setPixelRatio(window.devicePixelRatio);
-        let canvasWidth = 608; // Set canvas width
-        let canvasHeight = 608; // Set canvas height
-        renderer.setSize(canvasWidth, canvasHeight);
+        renderer.setSize(window.innerWidth, window.innerHeight);
         document.body.appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -28,33 +25,64 @@
         directionalLight.position.set(0, 1, 1);
         scene.add(directionalLight);
 
-        const originalImageWidth = 500; // Width of your image in pixels
-        const originalImageHeight = 608; // Height of your image in pixels
-        const imageWidth = originalImageWidth;
-        const imageHeight = originalImageHeight;
+        // Load your image
+const originalImageWidth = 400; // Width of your image in pixels
+const originalImageHeight = 608; // Height of your image in pixels
+
+
+// Calculate the new width and height while maintaining aspect ratio
+let imageWidth, imageHeight;
+
+if (originalImageWidth > originalImageHeight) {
+    // Landscape orientation
+    imageWidth = maxImageSize;
+    imageHeight = (originalImageHeight / originalImageWidth) * maxImageSize;
+} else {
+    // Portrait or square orientation
+    imageHeight = maxImageSize;
+    imageWidth = (originalImageWidth / originalImageHeight) * maxImageSize;
+}
 
         const imageAspectRatio = imageWidth / imageHeight;
+
         let cardWidth = 10.26; // Match the width of your image in scene units
         let cardHeight = cardWidth / imageAspectRatio; // Calculate the height based on the aspect ratio
         let cardDepth = 0.1;
         let speed = 7; // Default speed
+        let canvasWidth = 400; // Default canvas width
+        let canvasHeight = 400; // Default canvas height
 
         const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
 
+        // Load the texture with custom filtering options
         const textureLoader = new THREE.TextureLoader();
-        const frontTexture = textureLoader.load('front.jpg');
-        const backTexture = textureLoader.load('back.jpg');
+        const frontTexture = textureLoader.load('front.jpg', function (texture) {
+            // Set texture filtering options for better quality
+            texture.minFilter = THREE.LinearFilter; // Minification filter
+            texture.magFilter = THREE.LinearFilter; // Magnification filter
+        });
+
+        // Create a material with the loaded texture
         const frontMaterial = new THREE.MeshBasicMaterial({ map: frontTexture });
+        const backTexture = textureLoader.load('back.jpg'); // Load 'back.jpg'
         const backMaterial = new THREE.MeshBasicMaterial({ map: backTexture });
 
+        // Apply the materials to the card
         const cardMaterials = [
-            backMaterial, backMaterial, backMaterial,
-            backMaterial, frontMaterial, backMaterial
+            backMaterial, // Right side
+            backMaterial, // Left side
+            backMaterial, // Top side
+            backMaterial, // Bottom side
+            frontMaterial, // Front side
+            backMaterial // Back side
         ];
 
         const card = new THREE.Mesh(cardGeometry, cardMaterials);
-        scene.add(card);
+        const cardGroup = new THREE.Group();
+        cardGroup.add(card);
+        scene.add(cardGroup);
 
+        // Set initial rotation values
         card.rotation.x = -0.31;
         card.rotation.y = -1.09;
 
@@ -62,43 +90,66 @@
         controls.autoRotate = true;
         controls.autoRotateSpeed = speed;
 
-        // GIF creation logic
-        let gif;
-        let capturing = false;
-
-        function setupGIF() {
-            gif = new GIF({
-                workers: 2,
-                quality: 10,
-                width: canvasWidth,
-                height: canvasHeight
-            });
-
-            gif.on('finished', function(blob) {
-                window.open(URL.createObjectURL(blob));
-            });
+        // Function to update other variable values
+        function updateVariables() {
+            cardWidth = parseFloat(document.getElementById('cardWidth').value);
+            cardDepth = parseFloat(document.getElementById('cardDepth').value);
+            speed = parseFloat(document.getElementById('speed').value); // Update speed
+            card.scale.set(cardWidth / 10.26, cardWidth / 10.26, cardDepth / 0.1);
+            controls.autoRotateSpeed = speed;
         }
 
-        function captureFrame() {
-            if (capturing) {
-                gif.addFrame(renderer.domElement, { delay: 200, copy: true });
-            }
+        // Function to update camera position
+        function updateCameraPosition() {
+            const cameraX = parseFloat(document.getElementById('cameraX').value);
+            const cameraY = parseFloat(document.getElementById('cameraY').value);
+            const cameraZ = parseFloat(document.getElementById('cameraZ').value);
+            camera.position.set(cameraX, cameraY, cameraZ);
         }
 
-        function startCapturing() {
-            capturing = true;
-            setupGIF();
+        // Function to update canvas size
+        function updateCanvasSize() {
+            canvasWidth = parseFloat(document.getElementById('canvasWidth').value);
+            canvasHeight = parseFloat(document.getElementById('canvasHeight').value);
+            camera.aspect = canvasWidth / canvasHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(canvasWidth, canvasHeight);
         }
 
-        function stopCapturing() {
-            capturing = false;
-            gif.render();
+        // Function to update background color
+        function updateBackgroundColor() {
+            const bgColor = document.getElementById('bgColor').value;
+            renderer.setClearColor(bgColor);
         }
+
+        // Add event listeners to input elements with the 'input' event to auto-update variables
+        document.getElementById('cardWidth').addEventListener('input', updateVariables);
+        document.getElementById('cardDepth').addEventListener('input', updateVariables);
+        document.getElementById('speed').addEventListener('input', updateVariables);
+
+        // Add event listeners to camera position input elements
+        document.getElementById('cameraX').addEventListener('input', updateCameraPosition);
+        document.getElementById('cameraY').addEventListener('input', updateCameraPosition);
+        document.getElementById('cameraZ').addEventListener('input', updateCameraPosition);
+
+        // Add event listeners to canvas size input elements
+        document.getElementById('canvasWidth').addEventListener('input', updateCanvasSize);
+        document.getElementById('canvasHeight').addEventListener('input', updateCanvasSize);
+
+        // Add event listener to background color input
+        document.getElementById('bgColor').addEventListener('input', updateBackgroundColor);
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('resize', onWindowResize, false);
 
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
-            captureFrame(); // Capture frame for GIF
             renderer.render(scene, camera);
         }
 
@@ -106,12 +157,6 @@
     </script>
 </head>
 <body>
-    <div>
-        <button onclick="startCapturing()">Start Capturing</button>
-        <button onclick="stopCapturing()">Stop Capturing</button>
-    </div>
-
-
     <div>
         <label for="rotationX">X Rotation:</label>
         <input type="number" id="rotationX" step="0.01" value="-0.31">
