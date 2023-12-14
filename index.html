@@ -26,32 +26,13 @@
         scene.add(directionalLight);
 
         // Load your image
-const originalImageWidth = 1026; // Width of your image in pixels
-const originalImageHeight = 1566; // Height of your image in pixels
-const maxImageSize = 400; // Maximum width or height
-
-// Calculate the new width and height while maintaining aspect ratio
-let imageWidth, imageHeight;
-
-if (originalImageWidth > originalImageHeight) {
-    // Landscape orientation
-    imageWidth = maxImageSize;
-    imageHeight = (originalImageHeight / originalImageWidth) * maxImageSize;
-} else {
-    // Portrait or square orientation
-    imageHeight = maxImageSize;
-    imageWidth = (originalImageWidth / originalImageHeight) * maxImageSize;
-}
-
+        const imageWidth = 1026; // Width of your image in pixels
+        const imageHeight = 1566; // Height of your image in pixels
         const imageAspectRatio = imageWidth / imageHeight;
 
         let cardWidth = 10.26; // Match the width of your image in scene units
         let cardHeight = cardWidth / imageAspectRatio; // Calculate the height based on the aspect ratio
         let cardDepth = 0.1;
-        let speed = 7; // Default speed
-        let canvasWidth = 400; // Default canvas width
-        let canvasHeight = 400; // Default canvas height
-
         const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
 
         // Load the texture with custom filtering options
@@ -88,13 +69,13 @@ if (originalImageWidth > originalImageHeight) {
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.autoRotate = true;
-        controls.autoRotateSpeed = speed;
+        controls.autoRotateSpeed = 2;
 
         // Function to update other variable values
         function updateVariables() {
             cardWidth = parseFloat(document.getElementById('cardWidth').value);
             cardDepth = parseFloat(document.getElementById('cardDepth').value);
-            speed = parseFloat(document.getElementById('speed').value); // Update speed
+            const speed = parseFloat(document.getElementById('speed').value);
             card.scale.set(cardWidth / 10.26, cardWidth / 10.26, cardDepth / 0.1);
             controls.autoRotateSpeed = speed;
         }
@@ -109,8 +90,8 @@ if (originalImageWidth > originalImageHeight) {
 
         // Function to update canvas size
         function updateCanvasSize() {
-            canvasWidth = parseFloat(document.getElementById('canvasWidth').value);
-            canvasHeight = parseFloat(document.getElementById('canvasHeight').value);
+            const canvasWidth = parseFloat(document.getElementById('canvasWidth').value);
+            const canvasHeight = parseFloat(document.getElementById('canvasHeight').value);
             camera.aspect = canvasWidth / canvasHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(canvasWidth, canvasHeight);
@@ -157,6 +138,49 @@ if (originalImageWidth > originalImageHeight) {
     </script>
 </head>
 <body>
-
+    <div>
+        <label for="rotationX">X Rotation:</label>
+        <input type="number" id="rotationX" step="0.01" value="-0.31">
+    </div>
+    <div>
+        <label for="rotationY">Y Rotation:</label>
+        <input type="number" id="rotationY" step="0.01" value="-1.09">
+    </div>
+    <div>
+        <label for="cardWidth">Card Width:</label>
+        <input type="number" id="cardWidth" step="0.01" value="10.26">
+    </div>
+    <div>
+        <label for="cardDepth">Card Depth:</label>
+        <input type="number" id="cardDepth" step="0.01" value="0.1">
+    </div>
+    <div>
+        <label for="speed">Speed:</label>
+        <input type="number" id="speed" step="0.1" value="2">
+    </div>
+    <div>
+        <label for="cameraX">Camera X:</label>
+        <input type="number" id="cameraX" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="cameraY">Camera Y:</label>
+        <input type="number" id="cameraY" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="cameraZ">Camera Z:</label>
+        <input type="number" id="cameraZ" step="0.1" value="26">
+    </div>
+    <div>
+        <label for="canvasWidth">Canvas Width:</label>
+        <input type="number" id="canvasWidth" step="1" value="window.innerWidth">
+    </div>
+    <div>
+        <label for="canvasHeight">Canvas Height:</label>
+        <input type="number" id="canvasHeight" step="1" value="window.innerHeight">
+    </div>
+    <div>
+        <label for="bgColor">Background Color:</label>
+        <input type="color" id="bgColor" value="#131313">
+    </div>
 </body>
 </html>
