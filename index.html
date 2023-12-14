@@ -103,6 +103,14 @@
             renderer.setClearColor(bgColor);
         }
 
+        // Function to update card rotation
+        function updateCardRotation() {
+            const rotationX = parseFloat(document.getElementById('rotationX').value);
+            const rotationY = parseFloat(document.getElementById('rotationY').value);
+            card.rotation.x = rotationX;
+            card.rotation.y = rotationY;
+        }
+
         // Add event listeners to input elements with the 'input' event to auto-update variables
         document.getElementById('cardWidth').addEventListener('input', updateVariables);
         document.getElementById('cardDepth').addEventListener('input', updateVariables);
@@ -119,6 +127,10 @@
 
         // Add event listener to background color input
         document.getElementById('bgColor').addEventListener('input', updateBackgroundColor);
+
+        // Add event listeners to input elements for rotation
+        document.getElementById('rotationX').addEventListener('input', updateCardRotation);
+        document.getElementById('rotationY').addEventListener('input', updateCardRotation);
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -172,11 +184,11 @@
     </div>
     <div>
         <label for="canvasWidth">Canvas Width:</label>
-        <input type="number" id="canvasWidth" step="1" value="window.innerWidth">
+        <input type="number" id="canvasWidth" step="1" value="800">
     </div>
     <div>
         <label for="canvasHeight">Canvas Height:</label>
-        <input type="number" id="canvasHeight" step="1" value="window.innerHeight">
+        <input type="number" id="canvasHeight" step="1" value="600">
     </div>
     <div>
         <label for="bgColor">Background Color:</label>
