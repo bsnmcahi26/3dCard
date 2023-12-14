@@ -10,12 +10,12 @@
 
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 26;
+        camera.position.z = 25;
 
         const renderer = new THREE.WebGLRenderer({ antialias: true });
         renderer.setClearColor(0x131313);
         renderer.setPixelRatio(window.devicePixelRatio);
-        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setSize(400, 400);
         document.body.appendChild(renderer.domElement);
 
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -26,8 +26,8 @@
         scene.add(directionalLight);
 
         // Load your image
-        const imageWidth = 1026; // Width of your image in pixels
-        const imageHeight = 1566; // Height of your image in pixels
+        const imageWidth = 200 // Width of your image in pixels
+        const imageHeight = 300; // Height of your image in pixels
         const imageAspectRatio = imageWidth / imageHeight;
 
         let cardWidth = 10.26; // Match the width of your image in scene units
@@ -64,73 +64,26 @@
         scene.add(cardGroup);
 
         // Set initial rotation values
-        card.rotation.x = -0.31;
-        card.rotation.y = -1.09;
+        card.rotation.x = -0.25;
+        card.rotation.y = Math.PI; // Rotate 180 degrees (π radians) around the Y-axis
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.autoRotate = true;
-        controls.autoRotateSpeed = 2;
-
-        // Function to update other variable values
-        function updateVariables() {
-            cardWidth = parseFloat(document.getElementById('cardWidth').value);
-            cardDepth = parseFloat(document.getElementById('cardDepth').value);
-            const speed = parseFloat(document.getElementById('speed').value);
-            card.scale.set(cardWidth / 10.26, cardWidth / 10.26, cardDepth / 0.1);
-            controls.autoRotateSpeed = speed;
-        }
-
-        // Function to update camera position
-        function updateCameraPosition() {
-            const cameraX = parseFloat(document.getElementById('cameraX').value);
-            const cameraY = parseFloat(document.getElementById('cameraY').value);
-            const cameraZ = parseFloat(document.getElementById('cameraZ').value);
-            camera.position.set(cameraX, cameraY, cameraZ);
-        }
-
-        // Function to update canvas size
-        function updateCanvasSize() {
-            const canvasWidth = parseFloat(document.getElementById('canvasWidth').value);
-            const canvasHeight = parseFloat(document.getElementById('canvasHeight').value);
-            camera.aspect = canvasWidth / canvasHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(canvasWidth, canvasHeight);
-        }
-
-        // Function to update background color
-        function updateBackgroundColor() {
-            const bgColor = document.getElementById('bgColor').value;
-            renderer.setClearColor(bgColor);
-        }
+        controls.autoRotateSpeed = 8;
 
         // Function to update card rotation
         function updateCardRotation() {
             const rotationX = parseFloat(document.getElementById('rotationX').value);
             const rotationY = parseFloat(document.getElementById('rotationY').value);
+            
+            // Adjust the card's position so that it rotates around its bottom-left point
+            cardGroup.position.set(cardWidth / 2, -cardHeight / 2, 0);
             card.rotation.x = rotationX;
             card.rotation.y = rotationY;
+
+            // Translate the card back to its original position
+            cardGroup.position.set(0, 0, 0);
         }
-
-        // Add event listeners to input elements with the 'input' event to auto-update variables
-        document.getElementById('cardWidth').addEventListener('input', updateVariables);
-        document.getElementById('cardDepth').addEventListener('input', updateVariables);
-        document.getElementById('speed').addEventListener('input', updateVariables);
-
-        // Add event listeners to camera position input elements
-        document.getElementById('cameraX').addEventListener('input', updateCameraPosition);
-        document.getElementById('cameraY').addEventListener('input', updateCameraPosition);
-        document.getElementById('cameraZ').addEventListener('input', updateCameraPosition);
-
-        // Add event listeners to canvas size input elements
-        document.getElementById('canvasWidth').addEventListener('input', updateCanvasSize);
-        document.getElementById('canvasHeight').addEventListener('input', updateCanvasSize);
-
-        // Add event listener to background color input
-        document.getElementById('bgColor').addEventListener('input', updateBackgroundColor);
-
-        // Add event listeners to input elements for rotation
-        document.getElementById('rotationX').addEventListener('input', updateCardRotation);
-        document.getElementById('rotationY').addEventListener('input', updateCardRotation);
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
@@ -150,49 +103,5 @@
     </script>
 </head>
 <body>
-    <div>
-        <label for="rotationX">X Rotation:</label>
-        <input type="number" id="rotationX" step="0.01" value="-0.31">
-    </div>
-    <div>
-        <label for="rotationY">Y Rotation:</label>
-        <input type="number" id="rotationY" step="0.01" value="-1.09">
-    </div>
-    <div>
-        <label for="cardWidth">Card Width:</label>
-        <input type="number" id="cardWidth" step="0.01" value="10.26">
-    </div>
-    <div>
-        <label for="cardDepth">Card Depth:</label>
-        <input type="number" id="cardDepth" step="0.01" value="0.1">
-    </div>
-    <div>
-        <label for="speed">Speed:</label>
-        <input type="number" id="speed" step="0.1" value="2">
-    </div>
-    <div>
-        <label for="cameraX">Camera X:</label>
-        <input type="number" id="cameraX" step="0.1" value="0">
-    </div>
-    <div>
-        <label for="cameraY">Camera Y:</label>
-        <input type="number" id="cameraY" step="0.1" value="0">
-    </div>
-    <div>
-        <label for="cameraZ">Camera Z:</label>
-        <input type="number" id="cameraZ" step="0.1" value="26">
-    </div>
-    <div>
-        <label for="canvasWidth">Canvas Width:</label>
-        <input type="number" id="canvasWidth" step="1" value="800">
-    </div>
-    <div>
-        <label for="canvasHeight">Canvas Height:</label>
-        <input type="number" id="canvasHeight" step="1" value="600">
-    </div>
-    <div>
-        <label for="bgColor">Background Color:</label>
-        <input type="color" id="bgColor" value="#131313">
-    </div>
 </body>
 </html>
