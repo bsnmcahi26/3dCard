@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Card Rotation and Translation Control</title>
+    <script src="https://cdn.jsdelivr.net/npm/gif.js@0.0.0/dist/gif.js"></script>
+    <script type="module">
+        import * as THREE from 'https://esm.sh/three';
+        import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.118/examples/jsm/controls/OrbitControls.js';
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 26;
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setClearColor(0x131313);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        let canvasWidth = 608; // Set canvas width
+        let canvasHeight = 608; // Set canvas height
+        renderer.setSize(canvasWidth, canvasHeight);
+        document.body.appendChild(renderer.domElement);
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        directionalLight.position.set(0, 1, 1);
+        scene.add(directionalLight);
+
+        const originalImageWidth = 500; // Width of your image in pixels
+        const originalImageHeight = 608; // Height of your image in pixels
+        const imageWidth = originalImageWidth;
+        const imageHeight = originalImageHeight;
+
+        const imageAspectRatio = imageWidth / imageHeight;
+        let cardWidth = 10.26; // Match the width of your image in scene units
+        let cardHeight = cardWidth / imageAspectRatio; // Calculate the height based on the aspect ratio
+        let cardDepth = 0.1;
+        let speed = 7; // Default speed
+
+        const cardGeometry = new THREE.BoxGeometry(cardWidth, cardHeight, cardDepth);
+
+        const textureLoader = new THREE.TextureLoader();
+        const frontTexture = textureLoader.load('front.jpg');
+        const backTexture = textureLoader.load('back.jpg');
+        const frontMaterial = new THREE.MeshBasicMaterial({ map: frontTexture });
+        const backMaterial = new THREE.MeshBasicMaterial({ map: backTexture });
+
+        const cardMaterials = [
+            backMaterial, backMaterial, backMaterial,
+            backMaterial, frontMaterial, backMaterial
+        ];
+
+        const card = new THREE.Mesh(cardGeometry, cardMaterials);
+        scene.add(card);
+
+        card.rotation.x = -0.31;
+        card.rotation.y = -1.09;
+
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = speed;
+
+        // GIF creation logic
+        let gif;
+        let capturing = false;
+
+        function setupGIF() {
+            gif = new GIF({
+                workers: 2,
+                quality: 10,
+                width: canvasWidth,
+                height: canvasHeight
+            });
+
+            gif.on('finished', function(blob) {
+                window.open(URL.createObjectURL(blob));
+            });
+        }
+
+        function captureFrame() {
+            if (capturing) {
+                gif.addFrame(renderer.domElement, { delay: 200, copy: true });
+            }
+        }
+
+        function startCapturing() {
+            capturing = true;
+            setupGIF();
+        }
+
+        function stopCapturing() {
+            capturing = false;
+            gif.render();
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            captureFrame(); // Capture frame for GIF
+            renderer.render(scene, camera);
+        }
+
+        animate();
+    </script>
+</head>
+<body>
+    <div>
+        <button onclick="startCapturing()">Start Capturing</button>
+        <button onclick="stopCapturing()">Stop Capturing</button>
+    </div>
+
+
+    <div>
+        <label for="rotationX">X Rotation:</label>
+        <input type="number" id="rotationX" step="0.01" value="-0.31">
+    </div>
+    <div>
+        <label for="rotationY">Y Rotation:</label>
+        <input type="number" id="rotationY" step="0.01" value="-1.09">
+    </div>
+    <div>
+        <label for="cardWidth">Card Width:</label>
+        <input type="number" id="cardWidth" step="0.01" value="10.26">
+    </div>
+    <div>
+        <label for="cardDepth">Card Depth:</label>
+        <input type="number" id="cardDepth" step="0.01" value="0.1">
+    </div>
+    <div>
+        <label for="speed">Speed:</label>
+        <input type="number" id="speed" step="0.1" value="7">
+    </div>
+    <div>
+        <label for="cameraX">Camera X:</label>
+        <input type="number" id="cameraX" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="cameraY">Camera Y:</label>
+        <input type="number" id="cameraY" step="0.1" value="0">
+    </div>
+    <div>
+        <label for="cameraZ">Camera Z:</label>
+        <input type="number" id="cameraZ" step="0.1" value="26">
+    </div>
+    <div>
+        <label for="canvasWidth">Canvas Width:</label>
+        <input type="number" id="canvasWidth" step="1" value="400">
+    </div>
+    <div>
+        <label for="canvasHeight">Canvas Height:</label>
+        <input type="number" id="canvasHeight" step="1" value="400">
+    </div>
+    <div>
+        <label for="bgColor">Background Color:</label>
+        <input type="color" id="bgColor" value="#131313">
+    </div>
+</body>
+</html>
